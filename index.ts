@@ -31,15 +31,36 @@ async function main(): Promise<void> {
         } else {
             statusMessage(MessageType.Plain, `Found ${rows.length} rows with shopItems not equal to '[]'`);
 
+            const endTimes: number[] = [];
+
+            // Find all endTimestamps that are less than startTimestamp and add them to endTimes array
+            rows.forEach((row) => {
+                const shopItems: { state: "CANCELLED" | "IN_PROGRESS", "startTimestamp": number, "endTimestamp": number }[] = JSON.parse(row.shopItems);
+
+                for (let i = 0; i < shopItems.length; i++) {
+                    if (shopItems[i].state !== 'CANCELLED' && shopItems[i].startTimestamp > shopItems[i].endTimestamp) {
+                        endTimes.push(shopItems[i].endTimestamp);
+                    }
+                }
+            });
+
+            // Order endTimes in ascending order and create map of ms value to add to each endTimestamp
+            endTimes.sort((a, b) => a - b);
+
+            // Create map of ms value to add to each endTimestamp
+            const msMap: Map<number, number> = new Map();
+            for (let i = 0; i < endTimes.length; i++) {
+                msMap.set(endTimes[i], i);
+            }
+
             rows.forEach((row) => {
                 const shopItems: { state: "CANCELLED" | "IN_PROGRESS", "startTimestamp": number, "endTimestamp": number }[] = JSON.parse(row.shopItems);
                 
                 // If state is not CANCELLED and startTimestamp > endTimestamp, set endTimestamp to 3 months in the future from now
                 for (let i = 0; i < shopItems.length; i++) {
                     if (shopItems[i].state !== 'CANCELLED' && shopItems[i].startTimestamp > shopItems[i].endTimestamp) {
-                        const old = shopItems[i].endTimestamp;
-                        shopItems[i].endTimestamp = currentTimestamp + 7776000000;
-                        updateCount[0]++;                    
+                        shopItems[i].endTimestamp = currentTimestamp + 7776000000 + (msMap.get(shopItems[i].endTimestamp) ?? 0);
+                        updateCount[0]++;
                     }
                 }
 

@@ -6,7 +6,7 @@ async function main(): Promise<void> {
     // Needed for exit handler
     process.stdin.resume();
 
-    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const currentTimestamp = Date.now();
 
     // Find sqlite or db file in current directory
     const databaseFiles = fs.readdirSync(process.cwd()).filter((file) => file.endsWith('.sqlite') || file.endsWith('.db'));
@@ -19,7 +19,7 @@ async function main(): Promise<void> {
     const database = await databaseConnection(databaseFiles[0]);
 
     const whereValues: (string | number | boolean | null)[] = [];
-    const updateKeys: string[] = [];
+    const updateKeys: string[] = ['shopItems'];
     const updateValues: (string | number | boolean | null)[][] = [];
 
     const updateCount = [0];
@@ -37,13 +37,13 @@ async function main(): Promise<void> {
                 // If state is not CANCELLED and startTimestamp > endTimestamp, set endTimestamp to 3 months in the future from now
                 for (let i = 0; i < shopItems.length; i++) {
                     if (shopItems[i].state !== 'CANCELLED' && shopItems[i].startTimestamp > shopItems[i].endTimestamp) {
-                        shopItems[i].endTimestamp = currentTimestamp + 7776000;
-                        updateCount[0]++;
+                        const old = shopItems[i].endTimestamp;
+                        shopItems[i].endTimestamp = currentTimestamp + 7776000000;
+                        updateCount[0]++;                    
                     }
                 }
 
                 whereValues.push(row.id);
-                updateKeys.push('shopItems');
                 updateValues.push([JSON.stringify(shopItems)]);
             });
 

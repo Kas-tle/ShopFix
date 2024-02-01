@@ -1,0 +1,24 @@
+{
+    "name": "shopfix",
+    "version": "0.0.0",
+    "description": "Fix the shops...",
+    "repository": "https://github.com/Kas-tle/ShopFix.git",
+    "author": "Joshua Castle <packages@kastle.dev>",
+    "license": " AGPL-3.0-only",
+    "scripts": {
+        "build": "npx tsc"
+    },
+    "main": "dist/index.js",
+    "bin": {
+        "shopfix": "./dist/index.js"
+    },
+    "devDependencies": {
+        "@types/node": "^18.13.0",
+        "@types/sqlite3": "^3.1.8",
+        "typescript": "^4.9.5"
+    },
+    "dependencies": {
+        "chalk": "4.1.2",
+        "sqlite3": "^5.1.7"
+    }
+}
